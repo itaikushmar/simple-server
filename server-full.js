@@ -7,7 +7,8 @@
 const express = require('express'),
 	bodyParser = require('body-parser'),
 	cors = require('cors'),
-	mongodb = require('mongodb')
+	mongodb = require('mongodb');
+	
 
 const clientSessions = require("client-sessions");
 const multer = require('multer')
@@ -27,6 +28,9 @@ var storage = multer.diskStorage({
 var upload = multer({storage: storage})
 
 const app = express();
+
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 var corsOptions = {
   origin: /http:\/\/localhost:\d+/,
@@ -144,8 +148,9 @@ app.delete('/data/:objType/:id', function (req, res) {
 
 // POST - adds 
 app.post('/data/:objType', upload.single('file'), function (req, res) {
-	//console.log('req.file', req.file);
+	// console.log('req.file', req.file);
 	// console.log('req.body', req.body);
+	cl(req)
 
 	const objType = req.params.objType;
 	cl("POST for " + objType);
