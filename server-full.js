@@ -34,6 +34,7 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 var corsOptions = {
   origin: /http:\/\/localhost:\d+/,
+//   origin: '*',
   credentials: true
 };
 
@@ -155,7 +156,8 @@ app.post('/data/:objType', upload.single('file'), function (req, res) {
 	const objType = req.params.objType;
 	cl("POST for " + objType);
 
-	const obj = req.body;
+	let obj = req.body;
+	obj.loc = JSON.parse(obj.loc);
 	delete obj._id;
 	// If there is a file upload, add the url to the obj
 	if (req.file) {
