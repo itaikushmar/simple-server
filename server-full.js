@@ -34,6 +34,7 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 var corsOptions = {
   origin: /http:\/\/localhost:\d+/,
+//   origin: '*',
   credentials: true
 };
 
