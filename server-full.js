@@ -13,12 +13,20 @@ const express = require('express'),
 const clientSessions = require("client-sessions");
 const multer = require('multer')
 
+var port = process.env.PORT || 3003;
+
+var mongoUrl = 'mongodb://admin:misterbit@ds117209.mlab.com:17209/finalsprint';
+
+
+
 // Configure where uploaded files are going
 const uploadFolder = '/uploads';
 var storage = multer.diskStorage({
-	destination: function (req, file, cb) {
-		cb(null, __dirname + uploadFolder);
-	},
+	
+	// destination: function (req, file, cb) {
+	// 	cb(null, __dirname + uploadFolder);
+	// },
+	destination: __dirname + uploadFolder,
 	filename: function (req, file, cb) {
 		cl('file', file);
 		const ext = file.originalname.substr(file.originalname.lastIndexOf('.'));
@@ -28,17 +36,19 @@ var storage = multer.diskStorage({
 var upload = multer({storage: storage})
 
 const app = express();
+app.use('/', express.static(__dirname));
+
 
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 var corsOptions = {
-  origin: /http:\/\/localhost:\d+/,
-//   origin: '*',
+//   origin: /http:\/\/localhost:\d+/,
+  origin: '*',
   credentials: true
 };
 
-const serverRoot = 'http://localhost:3003/';
+const serverRoot = 'https://llamalizrok.herokuapp.com/';
 const baseUrl = serverRoot + 'data';
 
 
@@ -60,9 +70,8 @@ function dbConnect() {
 
 	return new Promise((resolve, reject) => {
 		// Connection URL
-		var url = 'mongodb://localhost:27017/finalsprint';
 		// Use connect method to connect to the Server
-		mongodb.MongoClient.connect(url, function (err, db) {
+		mongodb.MongoClient.connect(mongoUrl, function (err, db) {
 			if (err) {
 				cl('Cannot connect to DB', err)
 				reject(err);
@@ -242,8 +251,8 @@ app.get('/protected', requireLogin, function (req, res) {
 
 // Kickup our server 
 // Note: app.listen will not work with cors and the socket
-// app.listen(3003, function () {
-http.listen(3003, function () {
+// app.listen(port, function () {
+http.listen(port, function () {
 	console.log(`misterREST server is ready at ${baseUrl}`);
 	console.log(`GET (list): \t\t ${baseUrl}/{entity}`);
 	console.log(`GET (single): \t\t ${baseUrl}/{entity}/{id}`);
@@ -259,7 +268,7 @@ io.on('connection', function (socket) {
 	socket.on('disconnect', function () {
 		console.log('user disconnected');
 	});
-	socket.on('chat message', function (msg) {
+	socket.on('chat newMessage', function (msg) {
 		// console.log('message: ' + msg);
 		io.emit('chat message', msg);
 	});
@@ -276,3 +285,10 @@ function cl(...params) {
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/test-socket.html');
 });
+
+
+app.use('/*', express.static(__dirname));
+
+// app.listen(port, function () {
+//   console.log('server started ' + port);
+// });
